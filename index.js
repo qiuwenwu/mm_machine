@@ -499,7 +499,7 @@ class Index {
 					break;
 				}
 			}
-			return flie;
+			return file;
 		};
 
 		/**
