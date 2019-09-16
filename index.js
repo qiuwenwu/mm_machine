@@ -73,7 +73,18 @@ class Item {
 		Item.prototype.load_after = function() {
 
 		};
-
+		
+		/**
+		 * @description 新建脚本
+		 * @param {String} file
+		 */
+		Item.prototype.new_script = function(file){
+			var fl = dir_base + "/script.js";
+			if (fl.hasFile()) {
+				fl.copyFile(file);
+			}
+		};
+		
 		/**
 		 * @description 加载配置对象
 		 * @param {Object} obj 配置对象
@@ -95,15 +106,21 @@ class Item {
 						}
 					}
 				} else {
-					var fl = dir_base + "/script.js";
-					if (fl.hasFile()) {
-						fl.copyFile(file);
-					}
+					this.new_script(file);
 				}
 			}
 			this.load_after();
 		};
 
+		/**
+		 * @description 新建配置
+		 * @param {String} file
+		 */
+		Item.prototype.new_config = function(file){
+			var fl = dir_base + "/config.tpl.json";
+			fl.copyFile(file);
+		};
+		
 		/**
 		 * @description 加载配置文件
 		 * @param {String} file 文件路径
@@ -116,13 +133,12 @@ class Item {
 			if (text) {
 				obj = text.toJson();
 			} else {
-				var fl = dir_base + "/config.tpl.json";
-				fl.copyFile(f);
+				this.new_config(f);
 			}
 			this.filename = f;
 			return obj;
 		};
-
+		
 		/**
 		 * @description 删除脚本
 		 */
