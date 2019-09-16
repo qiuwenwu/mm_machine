@@ -28,7 +28,7 @@ class Item {
 		/**
 		 * @description 默认文件
 		 */
-		this.default_file = "./api.json";
+		this.default_file = "./sys.json";
 
 		// 当前文件
 		this.filename;
@@ -60,7 +60,7 @@ class Item {
 			/**
 			 * 排序
 			 */
-			"sort": 0,
+			"sort": 10,
 			/**
 			 * 开关, true表示开启，false表示关闭
 			 */
@@ -344,9 +344,10 @@ class Index {
 		 * @description 排序
 		 */
 		Index.prototype.sort = function() {
+			var _this = this;
 			this.list.sort(function(o1, o2) {
-				var p1 = o1.config[this.sort_key];
-				var p2 = o2.config[this.sort_key];
+				var p1 = o1.config[_this.sort_key];
+				var p2 = o2.config[_this.sort_key];
 				return p2 - p1;
 			});
 		};
