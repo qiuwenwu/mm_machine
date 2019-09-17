@@ -86,6 +86,16 @@ class Item {
 		};
 		
 		/**
+		 * @description 移除模块
+		 * @param {Object} module
+		 */
+		Item.prototype.remove_module = function(module){
+			var path = require.resolve(module);
+			delete require.cache[path];
+			// require.cache[path] = null;
+		};
+		
+		/**
 		 * @description 加载配置对象
 		 * @param {Object} obj 配置对象
 		 */
@@ -95,7 +105,7 @@ class Item {
 			if (f) {
 				var file = f.fullname(this.dir);
 				if (file.hasFile()) {
-					delete require.cache[file];
+					this.remove_module(file);
 					var cs = require(file);
 					if (cs) {
 						var name = this.config.func_name;
