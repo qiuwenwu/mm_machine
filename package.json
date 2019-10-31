@@ -29,6 +29,6 @@
   },
   "homepage": "https://github.com/qiuwenwu/mm_machine#readme",
   "dependencies": {
-    "mm_expand": "^1.2.7"
+    "mm_expand": "^1.3.1"
   }
 }
