@@ -78,7 +78,7 @@ class Item {
  * @description 加载完成时
  */
 Item.prototype.load_after = function() {
-
+	
 };
 
 /**
