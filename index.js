@@ -66,7 +66,7 @@ class Item {
 			 */
 			"switch": true
 		};
-		
+
 		/**
 		 * 模块目录
 		 */
@@ -78,7 +78,7 @@ class Item {
  * @description 加载完成时
  */
 Item.prototype.load_after = function() {
-	
+
 };
 
 /**
@@ -292,7 +292,7 @@ class Index {
 		 * 排序项
 		 */
 		this.sort_key = "sort";
-		
+
 		/**
 		 * 模块目录
 		 */
@@ -345,7 +345,7 @@ Index.prototype.load_list = function(list) {
 				_this.load_item(dir, obj, file);
 			}
 		} else {
-			var fl = this.dir_base + "/config.tpl.json";
+			var fl = _this.dir_base + "/config.tpl.json";
 			if (fl.hasFile()) {
 				fl.copyFile(file);
 			}
@@ -371,6 +371,7 @@ Index.prototype.load = function(path) {
 		search_dir = this.type;
 	}
 	var list_scope = $.dir.getAll(path, search_dir);
+
 	// 遍历目录路径
 	var _this = this;
 	list_scope.map(function(f) {
