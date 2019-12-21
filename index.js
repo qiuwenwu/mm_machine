@@ -411,7 +411,8 @@ Index.prototype.update = function(dir) {
 Index.prototype.get = function(name) {
 	var obj;
 	var lt = this.list;
-	for (var i = 0; i < lt.length; i++) {
+	const len = lt.length;
+	for (var i = 0; i < len; i++) {
 		var o = lt[i];
 		if (name === o.config.name) {
 			obj = o;
@@ -429,7 +430,8 @@ Index.prototype.get = function(name) {
 Index.prototype.set = function(cg) {
 	var bl = false;
 	var lt = this.list;
-	for (var i = 0; i < lt.length; i++) {
+	const len = lt.length;
+	for (var i = 0; i < len; i++) {
 		var o = lt[i];
 		if (cg.name === o.config.name) {
 			$.push(lt[i].config, cg);
@@ -512,7 +514,8 @@ Index.prototype.add = function(obj) {
 Index.prototype.del = function(name, remove) {
 	var lt = this.list;
 	var file = null;
-	for (var i = 0; i < lt.length; i++) {
+	const len = lt.length;
+	for (var i = 0; i < len; i++) {
 		var o = lt[i];
 		if (name === o.config.name) {
 			file = o.filename;
