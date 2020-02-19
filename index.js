@@ -397,7 +397,7 @@ Index.prototype.sort = function() {
  * @description 更新配置
  * @param {String} dir 检索的路径
  */
-Index.prototype.update = function(dir) {
+Index.prototype.update = async function(dir) {
 	this.clear();
 	this.load(dir);
 	this.sort();
