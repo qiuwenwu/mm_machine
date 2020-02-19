@@ -1,6 +1,6 @@
 {
   "name": "mm_machine",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "这是超级美眉框架机制构建辅助模块，用于快速构建一个机制",
   "main": "index.js",
   "scripts": {
@@ -29,6 +29,6 @@
   },
   "homepage": "https://github.com/qiuwenwu/mm_machine#readme",
   "dependencies": {
-    "mm_expand": "^1.3.5"
+    "mm_expand": "^1.3.6"
   }
 }
