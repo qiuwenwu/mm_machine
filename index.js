@@ -345,9 +345,14 @@ Index.prototype.load_list = function(list) {
 				_this.load_item(dir, obj, file);
 			}
 		} else {
-			var fl = _this.dir_base + "/config.tpl.json";
-			if (fl.hasFile()) {
-				fl.copyFile(file);
+			if (_this.Drive) {
+				var drive = new _this.Drive();
+				drive.new_config(file);
+			} else {
+				var fl = _this.dir_base + "/config.tpl.json";
+				if (fl.hasFile()) {
+					fl.copyFile(file);
+				}
 			}
 		}
 	});
