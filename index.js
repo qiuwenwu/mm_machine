@@ -3,8 +3,7 @@
  * @author <a href="http://qww.elins.cn">邱文武</a>
  * @version 1.2
  */
-
-require('mm_expand');
+var conf = require('mm_config');
 
 const fs = require('fs');
 
@@ -62,9 +61,9 @@ class Item {
 			 */
 			"sort": 10,
 			/**
-			 * 开关, true表示开启，false表示关闭
+			 * 状态, 0表示未启用, 1表示启用
 			 */
-			"switch": true
+			"state": 1
 		};
 
 		/**
@@ -72,6 +71,14 @@ class Item {
 		 */
 		this.dir_base = dir_base;
 	}
+}
+
+/**
+ * 设置配置
+ * @param {Object} config 配置
+ */
+Item.prototype.set_config = function(config){
+	this.config = conf(Object.assign({}, this.config, config || {}));
 }
 
 /**
@@ -103,19 +110,36 @@ Item.prototype.remove_module = function(module) {
 };
 
 /**
+ * @description 卸载对象
+ * @param {String} file 文件
+ */
+Item.prototype.unloadObj = function(file){
+	this.remove_module(file || this.filename);
+}
+
+/**
  * @description 加载配置对象
  * @param {Object} obj 配置对象
  */
-Item.prototype.loadObj = function(obj) {
-	$.push(this.config, obj, true);
-	var f = this.config.func_file;
+Item.prototype.loadObj = function(config) {
+	if(!config){
+		config = this.config;
+	}
+	else {
+		this.set_config(config);
+		config = this.config;
+	}
+	var f = config.func_file;
 	if (f) {
 		var file = f.fullname(this.dir);
 		if (file.hasFile()) {
+			if(!config.state){
+				return;
+			}
 			this.remove_module(file);
 			var cs = require(file);
 			if (cs) {
-				var name = this.config.func_name;
+				var name = config.func_name;
 				if (name) {
 					this.main = cs[name];
 				} else {
@@ -151,6 +175,10 @@ Item.prototype.loadFile = function(file) {
 		obj = text.toJson();
 	} else {
 		this.new_config(f);
+		var text = f.loadText();
+		if (text) {
+			obj = text.toJson();
+		}
 	}
 	this.filename = f;
 	return obj;
@@ -212,16 +240,13 @@ Item.prototype.removeFile = function() {
  * @param {Object|String} cg 配置对象或配置路径
  */
 Item.prototype.load = function(cg) {
-	var obj;
-	if (!cg) {
-		cg = this.extensions;
-	}
+	var config;
 	if (typeof(cg) === "string") {
-		obj = this.loadFile(cg);
+		config = this.loadFile(cg);
 	} else {
-		obj = cg;
+		config = cg;
 	}
-	this.loadObj(obj);
+	this.loadObj(config);
 };
 
 /**
@@ -256,6 +281,25 @@ Item.prototype.save = function() {
 Item.prototype.main = function(param1, param2) {
 	return null;
 };
+
+/**
+ * 运行指令
+ * @param {Number} state 状态 0为不可以，1为可用
+ * @param {Array} ...params 参数集合
+ */
+Item.prototype.run_cmd = function(state, ...params){
+	return null;
+};
+
+/**
+ * 下达指令
+ * @param {Number} state 状态 0为不可以，1为可用
+ * @param {Array} ...params 参数集合
+ */
+Item.prototype.cmd = function(state, ...params){
+	this.config.state = state;
+	return this.run_cmd(state, ...param);
+}
 
 /**
  * @module 导出Drive类
@@ -319,8 +363,8 @@ Index.prototype.Drive = Item;
  */
 Index.prototype.load_item = function(dir, cg, file) {
 	var drive = new this.Drive(dir);
-	drive.loadObj(cg);
 	drive.filename = file;
+	drive.loadObj(cg);
 	this.list.push(drive);
 };
 
@@ -426,6 +470,20 @@ Index.prototype.get = function(name) {
 	}
 	return obj;
 };
+
+/**
+ * 下达指令
+ * @param {String} name 名称
+ * @param {Number} state 状态
+ * @param {Array} ...params 参数集合
+ */
+Index.prototype.cmd = async function(name, state, ...params){
+	var obj = this.get(name);
+	if(!obj){
+		return "error: program does not exist";
+	}
+	return await obj.cmd(name, ...params);
+}
 
 /**
  * @description 查询配置项
