@@ -1,7 +1,7 @@
 /**
  * @fileOverview 机制构建帮助类函数
  * @author <a href="http://qww.elins.cn">邱文武</a>
- * @version 1.2
+ * @version 1.5
  */
 var conf = require('mm_config');
 
@@ -184,13 +184,32 @@ Item.prototype.loadFile = function(file) {
 	return obj;
 };
 
+function rmdir(dir) {
+	var list = fs.readdirSync(dir);
+	for (var i = 0; i < list.length; i++) {
+		var filename = path.join(dir, list[i]);
+		var stat = fs.statSync(filename);
+
+		if (filename == "." || filename == "..") {
+			// pass these files
+		} else if (stat.isDirectory()) {
+			// rmdir recursively
+			rmdir(filename);
+		} else {
+			// rm fiilename
+			fs.unlinkSync(filename);
+		}
+	}
+	fs.rmdirSync(dir);
+};
+
 /**
  * @description 删除脚本
  */
 Item.prototype.del_script = function() {
 	var f = this.config.func_file;
 	if (f) {
-		f.delFile(this.dir);
+		rmdir(this.dir);
 	}
 };
 
