@@ -143,7 +143,7 @@ Item.prototype.loadObj = function(config) {
 				if (name) {
 					this.main = cs[name];
 				} else {
-					$.push(this, cs);
+					$.push(this, cs, true);
 				}
 			}
 		} else {
