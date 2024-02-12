@@ -4,7 +4,7 @@
  * @version 1.5
  */
 var conf = require('mm_config');
-
+const util = require('util');
 const fs = require('fs');
 
 /**
@@ -77,8 +77,8 @@ class Item {
  * 设置配置
  * @param {Object} config 配置
  */
-Item.prototype.set_config = function(config){
-	this.config = conf(Object.assign({}, this.config, config || {}));
+Item.prototype.set_config = function(config) {
+	this.config = conf(Object.assign({}, this.config, config || {}), this.filename);
 }
 
 /**
@@ -113,7 +113,7 @@ Item.prototype.remove_module = function(module) {
  * @description 卸载对象
  * @param {String} file 文件
  */
-Item.prototype.unloadObj = function(file){
+Item.prototype.unloadObj = function(file) {
 	this.remove_module(file || this.filename);
 }
 
@@ -122,10 +122,9 @@ Item.prototype.unloadObj = function(file){
  * @param {Object} obj 配置对象
  */
 Item.prototype.loadObj = function(config) {
-	if(!config){
+	if (!config) {
 		config = this.config;
-	}
-	else {
+	} else {
 		this.set_config(config);
 		config = this.config;
 	}
@@ -133,7 +132,7 @@ Item.prototype.loadObj = function(config) {
 	if (f) {
 		var file = f.fullname(this.dir);
 		if (file.hasFile()) {
-			if(!config.state){
+			if (!config.state) {
 				return;
 			}
 			this.remove_module(file);
@@ -184,32 +183,13 @@ Item.prototype.loadFile = function(file) {
 	return obj;
 };
 
-function rmdir(dir) {
-	var list = fs.readdirSync(dir);
-	for (var i = 0; i < list.length; i++) {
-		var filename = path.join(dir, list[i]);
-		var stat = fs.statSync(filename);
-
-		if (filename == "." || filename == "..") {
-			// pass these files
-		} else if (stat.isDirectory()) {
-			// rmdir recursively
-			rmdir(filename);
-		} else {
-			// rm fiilename
-			fs.unlinkSync(filename);
-		}
-	}
-	fs.rmdirSync(dir);
-};
-
 /**
  * @description 删除脚本
  */
 Item.prototype.del_script = function() {
 	var f = this.config.func_file;
 	if (f) {
-		rmdir(this.dir);
+		$.dir.del(this.dir);
 	}
 };
 
@@ -301,12 +281,25 @@ Item.prototype.main = function(param1, param2) {
 	return null;
 };
 
+
+/**
+ * 调用函数
+ * @param {String} method 函数名
+ * @param {Object} params 参数集合
+ * @return {Object} 执行结果
+ */
+Item.prototype.run = function(method, ...params) {
+	if (this.config.state && this[method]) {
+		return this[method](params);
+	}
+};
+
 /**
  * 运行指令
  * @param {Number} state 状态 0为不可以，1为可用
  * @param {Array} ...params 参数集合
  */
-Item.prototype.run_cmd = function(state, ...params){
+Item.prototype.run_cmd = function(state, ...params) {
 	return null;
 };
 
@@ -315,7 +308,7 @@ Item.prototype.run_cmd = function(state, ...params){
  * @param {Number} state 状态 0为不可以，1为可用
  * @param {Array} ...params 参数集合
  */
-Item.prototype.cmd = function(state, ...params){
+Item.prototype.cmd = function(state, ...params) {
 	this.config.state = state;
 	return this.run_cmd(state, ...param);
 }
@@ -360,6 +353,11 @@ class Index {
 		 * 模块目录
 		 */
 		this.dir_base = dir_base;
+
+		/**
+		 * 模式 0生产模式，1开发模式，
+		 */
+		this.mode = 0;
 	}
 }
 
@@ -496,9 +494,9 @@ Index.prototype.get = function(name) {
  * @param {Number} state 状态
  * @param {Array} ...params 参数集合
  */
-Index.prototype.cmd = async function(name, state, ...params){
+Index.prototype.cmd = async function(name, state, ...params) {
 	var obj = this.get(name);
-	if(!obj){
+	if (!obj) {
 		return "error: program does not exist";
 	}
 	return await obj.cmd(name, ...params);
@@ -641,6 +639,42 @@ Index.prototype.load_file = function(file) {
 		return file + "文件不存在";
 	}
 	return null;
+};
+
+/**
+ * @description 重载脚本和配置
+ * @param {String} file 文件名
+ * @return {String} 重载失败返回错误提示，重载成功返回null
+ */
+Index.prototype.reload = function(name) {
+	var o = this.get(name);
+	if (o) {
+		o.load(o.filename);
+		return null;
+	}
+	return '没有找到模块';
+}
+
+/**
+ * 调用函数
+ * @param {String} 模块名
+ * @param {String} method 函数名
+ * @param {Object} params 参数集合
+ * @return {Object} 执行结果
+ */
+Index.prototype.run = async function(name, method, ...params) {
+	var o = await this.get(name);
+	var ret;
+	if (o) {
+		ret = o.run(method, params);
+		if (util.types.isPromise(ret)) {
+			ret = await ret;
+		}
+		if (this.mode) {
+			o.load(o.filename);
+		}
+	}
+	return ret;
 };
 
 /**
